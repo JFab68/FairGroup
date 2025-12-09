@@ -1,0 +1,5 @@
+const express = require('express'); const router = express.Router(); const { requireAuth, requireRole } = require('../middleware/auth');
+router.get('/me', requireAuth, async (req, res) => { const result = await db.query('SELECT id, first_name, last_name, email, phone, role FROM members WHERE id = ', [req.session.memberId]); res.json(result.rows[0]); });
+router.put('/me', requireAuth, async (req, res) => { const { first_name, last_name, phone } = req.body; const result = await db.query('UPDATE members SET first_name = , last_name = , phone =  WHERE id =  RETURNING *', [first_name, last_name, phone, req.session.memberId]); res.json(result.rows[0]); });
+router.get('/', requireAuth, requireRole('admin'), async (req, res) => { const result = await db.query(` SELECT m.*, array_agg(s.name) as subcommittees FROM members m LEFT JOIN member_subcommittees ms ON m.id = ms.member_id LEFT JOIN subcommittees s ON ms.subcommittee_id = s.id GROUP BY m.id `); res.json(result.rows); });
+module.exports = router;
